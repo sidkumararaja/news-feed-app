@@ -229,6 +229,30 @@ body {
   font-style: italic;
 }
 
+.dismiss-button {
+  margin-left: auto;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: Verdana, Geneva, sans-serif;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.article:hover .dismiss-button,
+.dismiss-button:focus-visible {
+  opacity: 1;
+}
+
+.dismiss-button:hover {
+  color: var(--accent);
+}
+
 .article {
   padding: 1.25rem 0;
   border-bottom: 1px solid var(--rule);

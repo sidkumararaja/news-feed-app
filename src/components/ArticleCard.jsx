@@ -9,7 +9,7 @@ function whyMatched(match) {
   return parts.join('; ');
 }
 
-export default function ArticleCard({ article }) {
+export default function ArticleCard({ article, onDismiss }) {
   const top = article.matches?.[0];
   return (
     <article className="article">
@@ -21,6 +21,15 @@ export default function ArticleCard({ article }) {
           <span className={`relevance-tag relevance-${article.tag}`}>
             {top.label}
           </span>
+        )}
+        {onDismiss && (
+          <button
+            className="dismiss-button"
+            title="Hide this article and show fewer like it"
+            onClick={() => onDismiss(article)}
+          >
+            not interested ×
+          </button>
         )}
       </div>
       <h2 className="article-title">

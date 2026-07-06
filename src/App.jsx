@@ -37,6 +37,24 @@ export default function App() {
     loadFeed();
   }, [loadFeed]);
 
+  async function dismiss(article) {
+    // Optimistic: hide immediately, then record the feedback.
+    setFeed((f) => ({
+      ...f,
+      articles: f.articles.filter((a) => a.id !== article.id),
+    }));
+    await fetch('/api/feedback', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        articleId: article.id,
+        title: article.title,
+        source: article.source.name,
+        terms: article.matches.flatMap((m) => m.terms.map((t) => t.term)),
+      }),
+    }).catch(() => {});
+  }
+
   return (
     <main className="page">
       <header className="masthead">
@@ -67,7 +85,7 @@ export default function App() {
       {feed && (
         <section className="feed" aria-busy={loading}>
           {visible.map((a) => (
-            <ArticleCard key={a.id} article={a} />
+            <ArticleCard key={a.id} article={a} onDismiss={dismiss} />
           ))}
           {visible.length === 0 && (
             <p className="loading">
