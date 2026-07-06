@@ -43,10 +43,21 @@ export function defaultStore() {
   };
 }
 
+// Vercel's Upstash Marketplace integration injects KV_REST_API_* names
+// (legacy Vercel KV convention); Upstash's own docs use UPSTASH_REDIS_REST_*.
+// Accept either.
 export function redisConfig() {
-  const url = process.env.UPSTASH_REDIS_REST_URL;
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  const url =
+    process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL;
+  const token =
+    process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN;
   return url && token ? { url, token } : null;
+}
+
+// 'redis' is durable; 'file' is fine locally but ephemeral on Vercel.
+export function storageBackend() {
+  if (redisConfig()) return 'redis';
+  return process.env.VERCEL ? 'ephemeral' : 'file';
 }
 
 function filePath() {

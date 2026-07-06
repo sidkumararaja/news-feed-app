@@ -77,6 +77,14 @@ export default function App() {
         </p>
       )}
 
+      {feed?.storage === 'ephemeral' && (
+        <p className="notice">
+          No durable storage configured — topics and dismissals will not
+          survive restarts. Connect Upstash Redis (see README) so the
+          serverless backend can persist your preferences.
+        </p>
+      )}
+
       {feed && <TopicManager topics={feed.topics} onChanged={loadFeed} />}
       {feed && (
         <FilterBar

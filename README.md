@@ -67,7 +67,7 @@ cp .env.example .env    # then paste your key from https://gnews.io
 1. Push this repo to GitHub, then **Add New → Project** in [Vercel](https://vercel.com/new) and import it. Vercel auto-detects Vite; no build settings needed.
 2. In **Project Settings → Environment Variables**, add `GNEWS_API_KEY` (server-side only; it is never bundled into the client).
 3. Deploy. `/api/*` becomes serverless functions automatically.
-4. **Recommended:** add the Upstash Redis integration from the Vercel Marketplace (free tier). It auto-injects `UPSTASH_REDIS_REST_URL`/`UPSTASH_REDIS_REST_TOKEN`, giving durable storage. Without it, preferences fall back to `/tmp`, which resets whenever the function instance is recycled.
+4. **Recommended:** add the Upstash Redis integration from the Vercel Marketplace (free tier). It auto-injects the REST credentials — as `KV_REST_API_URL`/`KV_REST_API_TOKEN` or `UPSTASH_REDIS_REST_URL`/`UPSTASH_REDIS_REST_TOKEN` depending on how it was installed; the app accepts either pair. Without them, preferences fall back to `/tmp`, which resets whenever the function instance is recycled (the app shows a banner when this is the case). Redeploy after adding the integration so the functions pick up the new variables.
 
 > **Note:** the app is single-user and has no auth — anyone with the URL can edit your topics. Keep the URL private, or enable Vercel Deployment Protection.
 

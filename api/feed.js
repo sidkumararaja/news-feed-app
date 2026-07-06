@@ -1,6 +1,6 @@
 import { fetchTopHeadlines, searchArticles, isMockMode } from './_lib/gnews.js';
 import { scoreArticles } from './_lib/scoring.js';
-import { loadStore } from './_lib/storage.js';
+import { loadStore, storageBackend } from './_lib/storage.js';
 import { sendJson } from './_lib/http.js';
 
 // Build one GNews search query per topic. OR-joined keywords keep recall
@@ -80,6 +80,7 @@ export default async function handler(req, res) {
       topics,
       mock: isMockMode(),
       fromCache,
+      storage: storageBackend(),
     });
   } catch (err) {
     sendJson(res, 502, { error: err.message });
