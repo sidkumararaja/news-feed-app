@@ -55,6 +55,14 @@ export default function App() {
     }).catch(() => {});
   }
 
+  async function resetPersonalization() {
+    if (!window.confirm('Clear all dismissed articles and learned down-weights?')) {
+      return;
+    }
+    await fetch('/api/feedback', { method: 'DELETE' }).catch(() => {});
+    loadFeed();
+  }
+
   return (
     <main className="page">
       <header className="masthead">
@@ -96,6 +104,15 @@ export default function App() {
           )}
         </section>
       )}
+
+      <footer className="colophon">
+        <span>
+          Articles via <a href="https://gnews.io">GNews</a>
+        </span>
+        <button className="link-button" onClick={resetPersonalization}>
+          reset personalization
+        </button>
+      </footer>
     </main>
   );
 }

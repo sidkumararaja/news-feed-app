@@ -6,9 +6,10 @@ import http from 'node:http';
 import path from 'node:path';
 import { existsSync, readFileSync } from 'node:fs';
 import { spawn } from 'node:child_process';
-import { pathToFileURL } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
-const ROOT = process.cwd();
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+process.chdir(ROOT);
 const API_PORT = 3001;
 
 // Load .env / .env.local without the dotenv package.
@@ -49,5 +50,8 @@ server.listen(API_PORT, () => {
   }
 });
 
-const vite = spawn('npx', ['vite'], { stdio: 'inherit', shell: true });
+// Run Vite's CLI entrypoint with the current Node binary; unlike `npx vite`
+// this works even when npm isn't on PATH.
+const viteBin = path.join(ROOT, 'node_modules', 'vite', 'bin', 'vite.js');
+const vite = spawn(process.execPath, [viteBin], { stdio: 'inherit' });
 vite.on('exit', (code) => process.exit(code ?? 0));

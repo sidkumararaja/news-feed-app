@@ -18,7 +18,10 @@ export default function ArticleCard({ article, onDismiss }) {
         <span className="article-dot">·</span>
         <time dateTime={article.publishedAt}>{timeAgo(article.publishedAt)}</time>
         {top && (
-          <span className={`relevance-tag relevance-${article.tag}`}>
+          <span
+            className={`relevance-tag relevance-${article.tag}`}
+            title={`Relevance ${article.relevance} (${article.tag})`}
+          >
             {top.label}
           </span>
         )}

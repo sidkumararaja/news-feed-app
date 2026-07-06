@@ -253,6 +253,31 @@ body {
   color: var(--accent);
 }
 
+.colophon {
+  margin-top: 2.5rem;
+  padding-top: 1rem;
+  border-top: 3px double var(--ink);
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.colophon a {
+  color: inherit;
+}
+
+@media (max-width: 30rem) {
+  .masthead h1 {
+    font-size: 1.8rem;
+  }
+
+  .dismiss-button {
+    opacity: 1;
+  }
+}
+
 .article {
   padding: 1.25rem 0;
   border-bottom: 1px solid var(--rule);
