@@ -1,19 +1,30 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import ArticleCard from './components/ArticleCard.jsx';
+import TopicManager from './components/TopicManager.jsx';
 
 export default function App() {
   const [feed, setFeed] = useState(null);
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  const loadFeed = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const r = await fetch('/api/feed');
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error || `Request failed (${r.status})`);
+      setFeed(data);
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    fetch('/api/feed')
-      .then(async (r) => {
-        const data = await r.json();
-        if (!r.ok) throw new Error(data.error || `Request failed (${r.status})`);
-        setFeed(data);
-      })
-      .catch((e) => setError(e.message));
-  }, []);
+    loadFeed();
+  }, [loadFeed]);
 
   return (
     <main className="page">
@@ -29,14 +40,19 @@ export default function App() {
         </p>
       )}
 
+      {feed && <TopicManager topics={feed.topics} onChanged={loadFeed} />}
+
       {error && <p className="error">Couldn't load the feed: {error}</p>}
-      {!feed && !error && <p className="loading">Setting the presses…</p>}
+      {loading && !feed && <p className="loading">Setting the presses…</p>}
 
       {feed && (
-        <section className="feed">
+        <section className="feed" aria-busy={loading}>
           {feed.articles.map((a) => (
             <ArticleCard key={a.id} article={a} />
           ))}
+          {feed.articles.length === 0 && (
+            <p className="loading">Nothing matched today. Try broader keywords.</p>
+          )}
         </section>
       )}
     </main>

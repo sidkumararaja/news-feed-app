@@ -69,9 +69,135 @@ body {
   text-align: center;
 }
 
+.topics {
+  margin: 1.25rem 0 0.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+.topics-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.section-heading {
+  font-family: Verdana, Geneva, sans-serif;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  margin: 0 0 0.6rem;
+}
+
+.link-button {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--accent);
+  font-family: Georgia, serif;
+  font-style: italic;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.topic-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.topic-chip {
+  border: 1px solid var(--ink);
+  padding: 0.25rem 0.7rem;
+  font-size: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #fff;
+}
+
+.chip-remove {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  padding: 0;
+  color: var(--accent);
+}
+
+.topic-empty {
+  color: var(--muted);
+  font-style: italic;
+  font-size: 0.9rem;
+}
+
+.topic-form {
+  margin-top: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.topic-form input {
+  font-family: Georgia, serif;
+  font-size: 0.95rem;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid var(--rule);
+  background: #fff;
+}
+
+.topic-form input:focus {
+  outline: 1px solid var(--ink);
+}
+
+.topic-form button {
+  align-self: flex-start;
+  font-family: Verdana, Geneva, sans-serif;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0.5rem 1rem;
+  background: var(--ink);
+  color: var(--paper);
+  border: none;
+  cursor: pointer;
+}
+
 .feed {
   display: flex;
   flex-direction: column;
+}
+
+.relevance-tag {
+  font-size: 0.65rem;
+  padding: 0.1rem 0.5rem;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  letter-spacing: 0.06em;
+}
+
+.relevance-high {
+  color: var(--accent);
+}
+
+.relevance-medium {
+  color: #7a5c00;
+}
+
+.relevance-low {
+  color: var(--muted);
+}
+
+.article-why {
+  margin: 0.5rem 0 0;
+  font-size: 0.82rem;
+  color: var(--muted);
+  font-style: italic;
 }
 
 .article {

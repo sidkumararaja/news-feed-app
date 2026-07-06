@@ -1,12 +1,27 @@
 import { timeAgo } from '../lib/format.js';
 
+function whyMatched(match) {
+  const inTitle = match.terms.filter((t) => t.field === 'title').map((t) => t.term);
+  const inSummary = match.terms.filter((t) => t.field === 'summary').map((t) => t.term);
+  const parts = [];
+  if (inTitle.length) parts.push(`${inTitle.join(', ')} in the headline`);
+  if (inSummary.length) parts.push(`${inSummary.join(', ')} in the summary`);
+  return parts.join('; ');
+}
+
 export default function ArticleCard({ article }) {
+  const top = article.matches?.[0];
   return (
     <article className="article">
       <div className="article-meta">
         <span className="article-source">{article.source.name}</span>
         <span className="article-dot">·</span>
         <time dateTime={article.publishedAt}>{timeAgo(article.publishedAt)}</time>
+        {top && (
+          <span className={`relevance-tag relevance-${article.tag}`}>
+            {top.label}
+          </span>
+        )}
       </div>
       <h2 className="article-title">
         <a href={article.url} target="_blank" rel="noopener noreferrer">
@@ -15,6 +30,16 @@ export default function ArticleCard({ article }) {
       </h2>
       {article.description && (
         <p className="article-summary">{article.description}</p>
+      )}
+      {top && (
+        <p className="article-why">
+          Matched <em>{top.label}</em>: {whyMatched(top)}
+          {article.matches.length > 1 &&
+            ` (+ ${article.matches
+              .slice(1)
+              .map((m) => m.label)
+              .join(', ')})`}
+        </p>
       )}
     </article>
   );
