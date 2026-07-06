@@ -29,12 +29,16 @@ export default async function handler(req, res) {
       fromCache = result.fromCache;
     } else {
       // One cached request per topic; results are merged and de-duplicated,
-      // then every article is scored against every topic.
-      const results = await Promise.all(
-        topics.map((t) => searchArticles(topicQuery(t)))
-      );
+      // then every article is scored against every topic. Uncached fetches
+      // run sequentially with a pause between them — GNews's free tier
+      // rate-limits bursts, so parallel requests get blocked.
+      const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
       const byId = new Map();
-      for (const r of results) {
+      let uncachedFetches = 0;
+      for (const t of topics) {
+        if (uncachedFetches > 0) await sleep(1100);
+        const r = await searchArticles(topicQuery(t));
+        if (!r.fromCache) uncachedFetches += 1;
         fromCache = fromCache && r.fromCache;
         for (const a of r.articles) byId.set(a.id, a);
       }

@@ -57,12 +57,24 @@ function mockResponse(endpoint, params) {
   return { articles: articles.map(normalize) };
 }
 
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const RATE_LIMIT_RE = /too many requests|rate ?limit/i;
+
+function errorDetail(resp, data) {
+  return Array.isArray(data.errors)
+    ? data.errors.join('; ')
+    : typeof data.errors === 'object' && data.errors
+      ? Object.values(data.errors).join('; ')
+      : `status ${resp.status}`;
+}
+
 async function gnewsFetch(endpoint, params) {
   const qs = new URLSearchParams(params);
   qs.sort();
   const cacheKey = `${endpoint}?${qs}`;
 
-  const hit = getCached(cacheKey);
+  const hit = await getCached(cacheKey);
   if (hit) return { ...hit, fromCache: true };
 
   let value;
@@ -70,18 +82,29 @@ async function gnewsFetch(endpoint, params) {
     value = mockResponse(endpoint, params);
   } else {
     qs.set('apikey', process.env.GNEWS_API_KEY);
-    const resp = await fetch(`${BASE}/${endpoint}?${qs}`);
-    const data = await resp.json().catch(() => ({}));
+    const url = `${BASE}/${endpoint}?${qs}`;
+
+    let resp = await fetch(url);
+    let data = await resp.json().catch(() => ({}));
+
+    // The free tier also rate-limits bursts, not just the daily quota.
+    // Back off once and retry before giving up.
+    if (!resp.ok && (resp.status === 429 || RATE_LIMIT_RE.test(errorDetail(resp, data)))) {
+      await sleep(1500);
+      resp = await fetch(url);
+      data = await resp.json().catch(() => ({}));
+    }
+
     if (!resp.ok) {
-      const detail = Array.isArray(data.errors)
-        ? data.errors.join('; ')
-        : `status ${resp.status}`;
-      throw new Error(`GNews request failed: ${detail}`);
+      // Prefer yesterday's news over an error page.
+      const stale = await getCached(cacheKey, { allowStale: true });
+      if (stale) return { ...stale, fromCache: true, stale: true };
+      throw new Error(`GNews request failed: ${errorDetail(resp, data)}`);
     }
     value = { articles: (data.articles ?? []).map(normalize) };
   }
 
-  setCached(cacheKey, value, TTL_MS);
+  await setCached(cacheKey, value, TTL_MS);
   return { ...value, fromCache: false };
 }
 

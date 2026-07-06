@@ -43,7 +43,7 @@ export function defaultStore() {
   };
 }
 
-function redisConfig() {
+export function redisConfig() {
   const url = process.env.UPSTASH_REDIS_REST_URL;
   const token = process.env.UPSTASH_REDIS_REST_TOKEN;
   return url && token ? { url, token } : null;

@@ -73,4 +73,10 @@ cp .env.example .env    # then paste your key from https://gnews.io
 
 ## Staying inside the GNews free tier
 
-The free tier allows 100 requests/day. The backend makes **one request per topic per cache window** (default 60 minutes, tune with `GNEWS_CACHE_TTL_MINUTES`); page loads in between are served from cache. Five topics at the default TTL is ~120 requests/day worst case — in practice far fewer, since requests only happen when someone loads the feed. GNews's terms permit "reasonable caching of API responses for application performance"; attribution is appreciated (footer link included).
+The free tier allows 100 requests/day **and** rate-limits bursts of requests in a short window. The backend defends both budgets:
+
+- **One request per topic per cache window** (default 60 minutes, tune with `GNEWS_CACHE_TTL_MINUTES`); page loads in between are served from cache. Five topics at the default TTL is ~120 requests/day worst case — in practice far fewer, since requests only happen when someone loads the feed.
+- **The cache is written through to Upstash Redis** when configured, so serverless cold starts reuse it instead of re-fetching.
+- **Uncached topic fetches run sequentially** with a ~1s gap, retry once after a backoff if GNews rate-limits the burst, and fall back to the most recent cached copy (kept 24h) rather than erroring.
+
+GNews's terms permit "reasonable caching of API responses for application performance"; attribution is appreciated (footer link included).
