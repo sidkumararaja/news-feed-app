@@ -168,6 +168,35 @@ body {
   cursor: pointer;
 }
 
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 0.8rem 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.filter-bar label {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: Verdana, Geneva, sans-serif;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+}
+
+.filter-bar select {
+  font-family: Georgia, serif;
+  font-size: 0.9rem;
+  padding: 0.25rem 0.4rem;
+  border: 1px solid var(--rule);
+  background: #fff;
+  color: var(--ink);
+  max-width: 12rem;
+}
+
 .feed {
   display: flex;
   flex-direction: column;

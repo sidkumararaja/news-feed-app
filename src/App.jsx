@@ -1,11 +1,22 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import ArticleCard from './components/ArticleCard.jsx';
 import TopicManager from './components/TopicManager.jsx';
+import FilterBar, { applyFilters } from './components/FilterBar.jsx';
 
 export default function App() {
   const [feed, setFeed] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [filters, setFilters] = useState({ topic: 'all', source: 'all', range: 'all' });
+
+  const sources = useMemo(
+    () => [...new Set((feed?.articles ?? []).map((a) => a.source.name))].sort(),
+    [feed]
+  );
+  const visible = useMemo(
+    () => applyFilters(feed?.articles ?? [], filters),
+    [feed, filters]
+  );
 
   const loadFeed = useCallback(async () => {
     setLoading(true);
@@ -41,17 +52,29 @@ export default function App() {
       )}
 
       {feed && <TopicManager topics={feed.topics} onChanged={loadFeed} />}
+      {feed && (
+        <FilterBar
+          topics={feed.topics}
+          sources={sources}
+          filters={filters}
+          onChange={setFilters}
+        />
+      )}
 
       {error && <p className="error">Couldn't load the feed: {error}</p>}
       {loading && !feed && <p className="loading">Setting the presses…</p>}
 
       {feed && (
         <section className="feed" aria-busy={loading}>
-          {feed.articles.map((a) => (
+          {visible.map((a) => (
             <ArticleCard key={a.id} article={a} />
           ))}
-          {feed.articles.length === 0 && (
-            <p className="loading">Nothing matched today. Try broader keywords.</p>
+          {visible.length === 0 && (
+            <p className="loading">
+              {feed.articles.length === 0
+                ? 'Nothing matched today. Try broader keywords.'
+                : 'No articles match the current filters.'}
+            </p>
           )}
         </section>
       )}
