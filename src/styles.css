@@ -1,0 +1,47 @@
+:root {
+  --ink: #1a1a1a;
+  --paper: #faf9f6;
+  --muted: #6b6b6b;
+  --rule: #d9d5cc;
+  --accent: #8b2500;
+  font-size: 16px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: Georgia, 'Times New Roman', serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.page {
+  max-width: 44rem;
+  margin: 0 auto;
+  padding: 2rem 1.25rem 4rem;
+}
+
+.masthead {
+  text-align: center;
+  border-bottom: 3px double var(--ink);
+  padding-bottom: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.masthead h1 {
+  margin: 0;
+  font-size: 2.4rem;
+  letter-spacing: 0.02em;
+  font-weight: 700;
+}
+
+.tagline {
+  margin: 0.4rem 0 0;
+  color: var(--muted);
+  font-style: italic;
+  font-size: 0.95rem;
+}
