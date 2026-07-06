@@ -175,9 +175,16 @@ export function relevanceTag(score) {
   return 'low';
 }
 
+// Articles fetched from a category feed (top-headlines) belong to that topic
+// even when no keyword fires; they get a modest base score so they stay
+// tagged and rankable, below any decent keyword match.
+const CATEGORY_BASE_SCORE = 1.5;
+
 // Score a batch of articles against all topics. Returns new article objects
 // with { matches, relevance, tag } added, sorted by relevance then recency.
-export function scoreArticles(articles, topics, penalties = {}) {
+// `origins` (articleId -> Set of topic ids whose fetch returned the article)
+// enables the category fallback above.
+export function scoreArticles(articles, topics, penalties = {}, origins = null) {
   const rarity = buildRarity(articles);
 
   const scored = articles.map((article) => {
@@ -191,6 +198,21 @@ export function scoreArticles(articles, topics, penalties = {}) {
           score: Number(score.toFixed(2)),
           terms,
         });
+      }
+    }
+    const from = origins?.get(article.id);
+    if (from) {
+      for (const topic of topics) {
+        if (!topic.category || !from.has(topic.id)) continue;
+        if (!matches.some((m) => m.topicId === topic.id)) {
+          matches.push({
+            topicId: topic.id,
+            label: topic.label,
+            score: CATEGORY_BASE_SCORE,
+            terms: [],
+            viaCategory: true,
+          });
+        }
       }
     }
     matches.sort((a, b) => b.score - a.score);

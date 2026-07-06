@@ -108,18 +108,23 @@ async function gnewsFetch(endpoint, params) {
   return { ...value, fromCache: false };
 }
 
-export function fetchTopHeadlines({ lang = 'en', max = 10 } = {}) {
+const LANG = process.env.GNEWS_LANG || 'en';
+const COUNTRY = process.env.GNEWS_COUNTRY || 'us';
+
+export function fetchTopHeadlines({ category = 'general', max = 10 } = {}) {
   return gnewsFetch('top-headlines', {
-    category: 'general',
-    lang,
+    category,
+    lang: LANG,
+    country: COUNTRY,
     max: String(max),
   });
 }
 
-export function searchArticles(q, { lang = 'en', max = 10 } = {}) {
+export function searchArticles(q, { max = 10 } = {}) {
   return gnewsFetch('search', {
     q,
-    lang,
+    lang: LANG,
+    country: COUNTRY,
     max: String(max),
     sortby: 'publishedAt',
   });

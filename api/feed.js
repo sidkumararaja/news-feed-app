@@ -38,6 +38,8 @@ export default async function handler(req, res) {
 
     let articles;
     let fromCache = true;
+    // articleId -> Set of topic ids whose fetch returned it
+    const origins = new Map();
     if (topics.length === 0) {
       const result = await fetchTopHeadlines();
       articles = result.articles;
@@ -54,10 +56,19 @@ export default async function handler(req, res) {
       for (const t of topics) {
         if (uncachedFetches > 0) await sleep(1100);
         try {
-          const r = await searchArticles(topicQuery(t));
+          // Category topics use GNews's native top-headlines feed;
+          // keyword topics use search.
+          const r = t.category
+            ? await fetchTopHeadlines({ category: t.category })
+            : await searchArticles(topicQuery(t));
           if (!r.fromCache) uncachedFetches += 1;
           fromCache = fromCache && r.fromCache;
-          for (const a of r.articles) byId.set(a.id, a);
+          for (const a of r.articles) {
+            byId.set(a.id, a);
+            let from = origins.get(a.id);
+            if (!from) origins.set(a.id, (from = new Set()));
+            from.add(t.id);
+          }
         } catch (err) {
           // One broken topic (bad keyword, rate limit with no cached copy)
           // shouldn't take down the rest of the feed.
@@ -71,7 +82,7 @@ export default async function handler(req, res) {
       articles = [...byId.values()];
     }
 
-    const scored = scoreArticles(articles, topics, store.penalties).filter(
+    const scored = scoreArticles(articles, topics, store.penalties, origins).filter(
       (a) => !store.dismissed[a.id]
     );
 

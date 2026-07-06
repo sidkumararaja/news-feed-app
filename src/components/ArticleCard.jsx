@@ -45,7 +45,15 @@ export default function ArticleCard({ article, onDismiss }) {
       )}
       {top && (
         <p className="article-why">
-          Matched <em>{top.label}</em>: {whyMatched(top)}
+          {top.terms.length > 0 ? (
+            <>
+              Matched <em>{top.label}</em>: {whyMatched(top)}
+            </>
+          ) : (
+            <>
+              From the <em>{top.label}</em> headlines
+            </>
+          )}
           {article.matches.length > 1 &&
             ` (+ ${article.matches
               .slice(1)

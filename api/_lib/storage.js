@@ -15,32 +15,65 @@ import path from 'node:path';
 
 const REDIS_KEY = 'news-feed-store';
 
+// Topics with a `category` are fetched from GNews's top-headlines endpoint
+// (native category feed); the rest use keyword search. Keywords are used for
+// relevance scoring either way.
 const DEFAULT_TOPICS = [
   {
-    id: 'ai-industry',
-    label: 'AI industry',
+    id: 'world-news',
+    label: 'World News',
+    category: 'world',
+    keywords: ['election', 'united nations', 'diplomacy', 'conflict', 'summit'],
+  },
+  {
+    id: 'ai',
+    label: 'AI',
     keywords: ['artificial intelligence', 'AI', 'LLM', 'OpenAI', 'Anthropic', 'machine learning'],
   },
   {
-    id: 'tabletop-gaming',
-    label: 'Tabletop gaming',
-    keywords: ['tabletop', 'board game', 'dungeons and dragons', 'D&D', 'miniature', 'RPG'],
+    id: 'movies',
+    label: 'Movies',
+    keywords: ['movie', 'film', 'box office', 'trailer', 'Hollywood', 'cinema'],
   },
   {
-    id: 'enterprise-software',
-    label: 'Enterprise software',
-    keywords: ['enterprise software', 'SaaS', 'Salesforce', 'SAP', 'cloud computing', 'Kubernetes'],
+    id: 'gaming',
+    label: 'Gaming',
+    keywords: ['video game', 'gaming', 'PlayStation', 'Xbox', 'Nintendo', 'Steam'],
+  },
+  {
+    id: 'sport',
+    label: 'Sport',
+    category: 'sports',
+    keywords: ['championship', 'NBA', 'NFL', 'soccer', 'tennis', 'Olympics'],
   },
 ];
 
+// Bump when DEFAULT_TOPICS changes shape; loadStore migrates stored data.
+const SEED_VERSION = 2;
+const LEGACY_TOPIC_IDS = ['ai-industry', 'tabletop-gaming', 'enterprise-software'];
+
 export function defaultStore() {
   return {
+    seedVersion: SEED_VERSION,
     topics: DEFAULT_TOPICS,
     // articleId -> { dismissedAt, title, source }
     dismissed: {},
     // learned down-weights from "not interested" clicks
     penalties: { terms: {}, sources: {} },
   };
+}
+
+// Replace retired seed topics with the current set, preserving anything the
+// user created themselves.
+async function migrate(store) {
+  if ((store.seedVersion ?? 1) >= SEED_VERSION) return store;
+  store.topics = store.topics.filter((t) => !LEGACY_TOPIC_IDS.includes(t.id));
+  for (const topic of DEFAULT_TOPICS) {
+    if (!store.topics.some((t) => t.id === topic.id)) store.topics.push(topic);
+  }
+  store.seedVersion = SEED_VERSION;
+  await saveStore(store);
+  return store;
 }
 
 // Vercel's Upstash Marketplace integration injects KV_REST_API_* names
@@ -80,7 +113,13 @@ export async function loadStore() {
   }
   if (!raw) return defaultStore();
   try {
-    return { ...defaultStore(), ...JSON.parse(raw) };
+    const parsed = JSON.parse(raw);
+    // Stores written before versioning existed count as version 1.
+    return await migrate({
+      ...defaultStore(),
+      ...parsed,
+      seedVersion: parsed.seedVersion ?? 1,
+    });
   } catch {
     return defaultStore();
   }
